@@ -24,5 +24,9 @@ Each video had the following information: video_id, trending_date, title, channe
 We create an S3 bucket and load the full data in two seperate folders : raw_statistics were we will store the csv files and raw_statistics_reference_data were we will store the JSON files.
 ![](https://github.com/nadinelabidi/Youtube-analysis/blob/main/images/buckets.webm)
 #### Step 2
+To create our data lake, we must catalog our data. To do that we will use aws Glue Data Catalog (an index to the location, schema, and runtime metrics of your data). We use the information in the Data Catalog to create and monitor our ETL jobs.
+First, we create a crawler that connects to the data we stored ,writes metadata to the Data Catalog, determines the data structures and writes tables into the Data Catalog. These tables will be stored into a databse.
+![](https://github.com/nadinelabidi/Youtube-analysis/blob/main/images/crawler.PNG)
+![](https://github.com/nadinelabidi/Youtube-analysis/blob/main/images/table.PNG)
 
 
