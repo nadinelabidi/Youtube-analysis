@@ -27,10 +27,16 @@ To create our data lake, we must catalog our data. To do that we will use aws Gl
 First, we create a crawler that connects to the data we stored ,writes metadata to the Data Catalog, determines the data structures and writes tables into the Data Catalog. These tables will be stored into a databse.
 ![](https://github.com/nadinelabidi/Youtube-analysis/blob/main/images/crawler.PNG)
 ![](https://github.com/nadinelabidi/Youtube-analysis/blob/main/images/table.PNG)
-#### Step 3
+#### Step 3 
 We will now view the table's data. This will automatically take us to AWS Athena to query the data.To process our data we need to identify where the results of the queries will be stored.
 PS: To query data it needs to be in a proper format and that's or the following reason:
 ![](https://github.com/nadinelabidi/Youtube-analysis/blob/main/images/error.PNG)
+
 ==> We need to format the data 
+#### Step 4: JSON to Apache Parquet 
+Data cleansing is an essential process for preparing raw data for machine learning (ML) and business intelligence (BI) applications. Raw data may contain numerous errors, which can affect the accuracy of ML models and lead to incorrect predictions and negative business impact. 
+![](https://github.com/nadinelabidi/Youtube-analysis/blob/main/images/data%20cleansing.PNG)
+
+
 
 
