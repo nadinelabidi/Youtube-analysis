@@ -11,7 +11,7 @@ Each region’s data is in a separate file. Data includes the video title, chann
 This dataset was collected using the YouTube API. 
 Each video had the following information: video_id, trending_date, title, channel_title, category_id, publish_time, tags, views, likes, and dislikes.
 
-## Requirements
+## Prerequisites
 1. An aws user account 
 2. AWS S3 were we will store our data (object storage)
 3. AWS QuickSight: serverless machine learning-powered business intelligence (BI) service
@@ -19,5 +19,10 @@ Each video had the following information: video_id, trending_date, title, channe
 5. AWS Lambda to run our code
 6. AWS Athena to query data in s3
 
+## Step by step project
+#### Step 1
+We create an S3 bucket and load the full data in two seperate folders : raw_statistics were we will store the csv files and raw_statistics_reference_data were we will store the JSON files.
+![](https://github.com/nadinelabidi/Youtube-analysis/blob/main/images/buckets.webm)
+#### Step 2
 
 
