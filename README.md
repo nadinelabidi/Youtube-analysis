@@ -28,15 +28,66 @@ First, we create a crawler that connects to the data we stored ,writes metadata 
 ![](https://github.com/nadinelabidi/Youtube-analysis/blob/main/images/crawler.PNG)
 ![](https://github.com/nadinelabidi/Youtube-analysis/blob/main/images/table.PNG)
 #### Step 3 
-We will now view the table's data. This will automatically take us to AWS Athena to query the data.To process our data we need to identify where the results of the queries will be stored.
+We will now view the data we have in the table we created. This will automatically take us to AWS Athena to query the data, view the data and process it.
 PS: To query data it needs to be in a proper format and that's or the following reason:
 ![](https://github.com/nadinelabidi/Youtube-analysis/blob/main/images/error.PNG)
 
-==> We need to format the data 
+==> So for the JSON files, We need to format the data 
 #### Step 4: JSON to Apache Parquet 
 Data cleansing is an essential process for preparing raw data for machine learning (ML) and business intelligence (BI) applications. Raw data may contain numerous errors, which can affect the accuracy of ML models and lead to incorrect predictions and negative business impact. 
 ![](https://github.com/nadinelabidi/Youtube-analysis/blob/main/images/data%20cleansing.PNG)
+We build a Lambda function with python 3.9 and we give it full access to S3 buckets. Then we create the following function and configure its test event.
+```
+import awswrangler as wr
+import pandas as pd
+import urllib.parse
+import os
 
+# Temporary hard-coded AWS Settings; i.e. to be set as OS variable in Lambda
+os_input_s3_cleansed_layer = os.environ['s3_cleansed_layer']
+os_input_glue_catalog_db_name = os.environ['glue_catalog_db_name']
+os_input_glue_catalog_table_name = os.environ['glue_catalog_table_name']
+os_input_write_data_operation = os.environ['write_data_operation']
+
+
+def lambda_handler(event, context):
+    # Get the object from the event and show its content type
+    bucket = event['Records'][0]['s3']['bucket']['name']
+    key = urllib.parse.unquote_plus(event['Records'][0]['s3']['object']['key'], encoding='utf-8')
+    try:
+
+        # Creating DF from content
+        df_raw = wr.s3.read_json('s3://{}/{}'.format(bucket, key))
+
+        # Extract required columns:
+        df_step_1 = pd.json_normalize(df_raw['items'])
+
+        # Write to S3
+        wr_response = wr.s3.to_parquet(
+            df=df_step_1,
+            path=os_input_s3_cleansed_layer,
+            dataset=True,
+            database=os_input_glue_catalog_db_name,
+            table=os_input_glue_catalog_table_name,
+            mode=os_input_write_data_operation
+        )
+
+        return wr_response
+    except Exception as e:
+        print(e)
+        print('Error getting object {} from bucket {}. Make sure they exist and your bucket is in the same region as this function.'.format(key, bucket))
+        raise e
+``` 
+
+After cleaning our data, we get the proper data format:
+![](https://github.com/nadinelabidi/Youtube-analysis/blob/main/images/clean_reference_data.PNG)
+
+#### Step 5
+We will repeat the same process for the csv files. We create a crawler attached to the s3 bucket where the csv files are stored. Then once the crawler stops, we move to aws Athena to vview the csv table and query it.
+![](https://github.com/nadinelabidi/Youtube-analysis/blob/main/images/table_csv_videos.png)
+
+#### Step 6
+Now we will join the two tables: "cleaned_statistics_reference_data" and "row_statistics" on the 'category_id"
 
 
 
