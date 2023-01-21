@@ -23,6 +23,7 @@ Each video had the following information: video_id, trending_date, title, channe
 #### Step 1
 We create an [S3 bucket](https://github.com/nadinelabidi/Youtube-analysis/blob/main/images/buckets.webm) and load the full data in two seperate folders : raw_statistics were we will store the csv files and raw_statistics_reference_data were we will store the JSON files.
 #### Step 2
+AWS Glue consolidates major data integration capabilities into a single service. These include data discovery, modern ETL, cleansing, transforming, and centralized cataloging. With AWS Glue, you can discover and connect to more than 70 diverse data sources and manage your data in a centralized data catalog. You can visually create, run, and monitor extract, transform, and load (ETL) pipelines to load data into your data lakes.
 To create our data lake, we must catalog our data. To do that we will use aws Glue Data Catalog (an index to the location, schema, and runtime metrics of your data). We use the information in the Data Catalog to create and monitor our ETL jobs.
 First, we create a crawler that connects to the data we stored ,writes metadata to the Data Catalog, determines the data structures and writes tables into the Data Catalog. These tables will be stored into a databse.
 ![](https://github.com/nadinelabidi/Youtube-analysis/blob/main/images/crawler.PNG)
@@ -79,6 +80,7 @@ def lambda_handler(event, context):
         raise e
 ``` 
 
+
 After cleaning our data, we get the proper data format:
 ![](https://github.com/nadinelabidi/Youtube-analysis/blob/main/images/clean_reference_data.PNG)
 
@@ -86,8 +88,32 @@ After cleaning our data, we get the proper data format:
 We will repeat the same process for the csv files. We create a crawler attached to the s3 bucket where the csv files are stored. Then once the crawler stops, we move to aws Athena to vview the csv table and query it.
 ![](https://github.com/nadinelabidi/Youtube-analysis/blob/main/images/table_csv_videos.png)
 
-#### Step 6
-Now we will join the two tables: "cleaned_statistics_reference_data" and "row_statistics" on the 'category_id"
+#### Step 6: ETL JOB using AWS Glue
+Next, we will transform these files into partitioned parquet files for that we will create a Glue job to transform the csv files into parquet files.T he AWS Glue ETL job converts the data to Apache Parquet format and stores it in the clean S3 bucket.  You can modify the ETL job to achieve other objectives, like more granular partitioning. In our case, we will partition the data based on regions.
+![](https://github.com/nadinelabidi/Youtube-analysis/blob/main/images/csv_to_parquet.PNG)
+
+==> Now we have cleaned parquet files ready to be used.
+
+#### Step 6:  Automating the entire process
+You can do this using an AWS Lambda function invoked by an Amazon S3 trigger to start an AWS Glue crawler that catalogs the data.
+![](https://github.com/nadinelabidi/Youtube-analysis/blob/main/images/s3_trigger.PNG)
+
+#### Step 7:
+Now we will join the two tables: "cleaned_statistics_reference_data" and "clean_statistics" on the 'category_id" using the aws Glue and provide the targeted s3 bucket and the targeted database were we will store the data.
+We create a new Job: 
+![](https://github.com/nadinelabidi/Youtube-analysis/blob/main/images/join_glue_job.PNG)
+
+Once the job is completed, our data is ready to be analysed.
+![](https://github.com/nadinelabidi/Youtube-analysis/blob/main/images/joined_data.png)
+
+#### Step 8: Build insughts from our data
+For this we will use AWS QuickSight.
+Amazon QuickSight powers data-driven organizations with unified business intelligence (BI) at hyperscale. With QuickSight, all users can meet varying analytic needs from the same source of truth through modern interactive dashboards, paginated reports, embedded analytics, and natural language queries.
+First, we sign up for aws QuickSight. Then, we need to build the datasets.
+We authorize connections to Athena and the associated bucket in Amazon Simple Storage Service (Amazon S3) were our clean data resign. Using a connection from QuickSight to Athena, you can write SQL queries to interrogate data that's stored in relational, non-relational, object, and custom data sources. 
+you can follow this [link](https://catalog.us-east-1.prod.workshops.aws/workshops/9981f1a1-abdc-49b5-8387-cb01d238bb78/en-US/30-basics/307-quicksight) to configure AWS QuickSight with AWS Athena and S3 buckets.
+Finally, we will take you through some of the different chart types.
+![](https://github.com/nadinelabidi/Youtube-analysis/blob/main/images/data_visualization.PNG)
 
 
 
